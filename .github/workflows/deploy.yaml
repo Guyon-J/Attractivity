@@ -27,13 +27,13 @@ jobs:
             any::dplyr
             any::leaflet
             
-      - name: Deploy to Shinyapps.io
+      - name: Authorize and Deploy Application
+        env:
+          ACCOUNT: ${{ secrets.SHINYAPPS_ACCOUNT }}
+          TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
+          SECRET: ${{ secrets.SHINYAPPS_SECRET }}
         run: |
-          Rscript -e "
-            rsconnect::setAccountInfo(
-              name='${{ secrets.SHINYAPPS_ACCOUNT }}',
-              token='${{ secrets.SHINYAPPS_TOKEN }}',
-              secret='${{ secrets.SHINYAPPS_SECRET }}'
-            )
-            rsconnect::deployApp(appName='Cartographie_CNBBMM')
-          "
+          library(rsconnect)
+          setAccountInfo(name = Sys.getenv("ACCOUNT"), token = Sys.getenv("TOKEN"), secret = Sys.getenv("SECRET"))
+          deployApp(appDir = ".", forceUpdate = TRUE)
+        shell: Rscript {0}
