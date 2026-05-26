@@ -2,28 +2,36 @@ name: Deploy to shinyapps.io
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - main # Remplacer par 'master' si votre branche principale s'appelle ainsi
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true 
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Install Packages
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Install Dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::rsconnect
+            any::shiny
+            # Ajoutez ici vos autres packages (ex: any::ggplot2, any::dplyr)
+
+      - name: Deploy to Shinyapps.io
         run: |
-          Rscript -e 'install.packages(c("rsconnect", "shiny"))'
-          # Ajoutez vos autres packages ici si nécessaire, ex: "ggplot2", "dplyr"
-        
-      - name: Authorize and Deploy
-        env:
-          SHINYAPPS_ACCOUNT: ${{ secrets.SHINYAPPS_ACCOUNT_NAME }}
-          SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
-          SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
-        run: |
-          Rscript -e "rsconnect::setAccountInfo(name='${{ env.SHINYAPPS_ACCOUNT }}', token='${{ env.SHINYAPPS_TOKEN }}', secret='${{ env.SHINYAPPS_SECRET }}')"
-          Rscript -e "rsconnect::deployApp('.')"
+          Rscript -e "
+            rsconnect::setAccountInfo(
+              name='${{ secrets.SHINYAPPS_ACCOUNT }}',
+              token='${{ secrets.SHINYAPPS_TOKEN }}',
+              secret='${{ secrets.SHINYAPPS_SECRET }}'
+            )
+            rsconnect::deployApp(appName='nom-de-votre-app')
+          "
