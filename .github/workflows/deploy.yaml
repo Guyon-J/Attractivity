@@ -3,7 +3,7 @@ name: Deploy to shinyapps.io
 on:
   push:
     branches:
-      - main # Remplacer par 'master' si votre branche principale s'appelle ainsi
+      - main
 
 jobs:
   deploy:
@@ -33,5 +33,5 @@ jobs:
               token='${{ secrets.SHINYAPPS_TOKEN }}',
               secret='${{ secrets.SHINYAPPS_SECRET }}'
             )
-            rsconnect::deployApp(appName='nom-de-votre-app')
+            rsconnect::deployApp(appName='Cartographie_CNBBMM')
           "
