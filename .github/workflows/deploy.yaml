@@ -2,7 +2,7 @@ name: Deploy to shinyapps.io
 
 on:
   push:
-    branches: [ main, master ] # Déclenche le déploiement lors d'un push sur main
+    branches: [ main, master ]
 
 jobs:
   deploy:
@@ -11,15 +11,17 @@ jobs:
       - uses: actions/checkout@v3
       
       - uses: r-lib/actions/setup-r@v2
-      
-      - uses: r-lib/actions/setup-renv@v2 # Gère les dépendances si vous utilisez renv
-        
-      - name: Install rsconnect
-        run: Rscript -e 'install.packages("rsconnect")'
+        with:
+          use-public-rspm: true 
+
+      - name: Install Packages
+        run: |
+          Rscript -e 'install.packages(c("rsconnect", "shiny"))'
+          # Ajoutez vos autres packages ici si nécessaire, ex: "ggplot2", "dplyr"
         
       - name: Authorize and Deploy
         env:
-          SHINYAPPS_ACCOUNT: ${{ secrets.SHINYAPPS_ACCOUNT_NAME }} # Votre nom d'utilisateur shinyapps
+          SHINYAPPS_ACCOUNT: ${{ secrets.SHINYAPPS_ACCOUNT_NAME }}
           SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
           SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
         run: |
