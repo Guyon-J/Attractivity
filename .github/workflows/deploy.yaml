@@ -35,12 +35,9 @@ jobs:
         run: |
           library(rsconnect)
           
-          # Connexion
           setAccountInfo(name = Sys.getenv("ACCOUNT"), token = Sys.getenv("TOKEN"), secret = Sys.getenv("SECRET"))
           
-          # Force l'écriture du manifeste à la racine pour éviter le bug d'absence du fichier
-          rsconnect::writeManifest(appDir = ".")
+          rsconnect::writeManifest(appDir = "Cartographie_CNBBMM")
           
-          # Déploiement
           deployApp(appDir = ".", forceUpdate = TRUE)
         shell: Rscript {0}
