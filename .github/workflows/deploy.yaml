@@ -23,8 +23,10 @@ jobs:
           packages: |
             any::rsconnect
             any::shiny
-            # Ajoutez ici vos autres packages (ex: any::ggplot2, any::dplyr)
-
+            any::bslib
+            any::dplyr
+            any::leaflet
+            
       - name: Deploy to Shinyapps.io
         run: |
           Rscript -e "
