@@ -201,19 +201,19 @@ server <- function(input, output, session) {
       
       nav_panel(title = exp, boutons_commentaires)
     })
+        
+    onglet_actuel <- isolate(input$expertise_tabs_id)
     
-    active_tab <- if(input$mode == "expert") input$select_expert else NULL
-    do.call(navset_tab, c(liste_panels, list(selected = active_tab)))
-  })
-  
-  observe({
-    req(current_selection() != "")
-    lapply(1:nrow(full_data), function(i) {
-      observeEvent(input[[paste0("comment_click_", i)]], {
-        selected_row_index(i)
-      })
-    })
-  })
+    active_tab <- if (!is.null(onglet_actuel)) {
+      onglet_actuel
+    } else if (input$mode == "expert") {
+      input$select_expert
+    } else {
+      NULL
+    }
+    
+    do.call(navset_tab, c(liste_panels, list(id = "expertise_tabs_id", selected = active_tab)))
+})
   
   output$description_contact_panel <- renderUI({
     if(is.null(selected_row_index()) || current_selection() == "") {
