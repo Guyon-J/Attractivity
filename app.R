@@ -158,20 +158,44 @@ server <- function(input, output, session) {
     }
   })
   
-  output$info_panel <- renderUI({
-    if(current_selection() == "") {
-      return(p(em("Veuillez cliquer sur un marqueur bleu de la carte pour afficher les expertises de cette ville.")))
-    }
+output$info_panel <- renderUI({
+  if(current_selection() == "") {
+    return(p(em("Veuillez cliquer sur un marqueur bleu de la carte pour afficher les expertises de cette ville.")))
+  }
+  
+  infos <- full_data %>% 
+    mutate(original_id = row_number()) %>% 
+    filter(Villes == current_selection())
+  
+  if(nrow(infos) == 0) return(p("Aucune donnée pour cette ville."))
+  
+  expertises_uniques <- unique(infos$Expertise)
+  
+  liste_panels <- lapply(expertises_uniques, function(exp) {
+    # Nettoyage du nom pour créer un ID Shiny valide (sans espaces ni accents)
+    id_propre <- gsub("[^a-zA-Z0-9]", "_", exp)
     
-    infos <- full_data %>% 
-      mutate(original_id = row_number()) %>% 
-      filter(Villes == current_selection())
+    # On crée l'onglet vide avec un sous-uiOutput à l'intérieur
+    nav_panel(title = exp, uiOutput(paste0("content_exp_", id_propre)))
+  })
+  
+  active_tab <- if(input$mode == "expert") input$select_expert else NULL
+  do.call(navset_tab, c(liste_panels, list(id = "expertise_tabs_id", selected = active_tab)))
+})
+
+observe({
+  req(current_selection() != "")
+  
+  infos <- full_data %>% 
+    mutate(original_id = row_number()) %>% 
+    filter(Villes == current_selection())
+  
+  expertises_uniques <- unique(infos$Expertise)
+  
+  lapply(expertises_uniques, function(exp) {
+    id_propre <- gsub("[^a-zA-Z0-9]", "_", exp)
     
-    if(nrow(infos) == 0) return(p("Aucune donnée pour cette ville."))
-    
-    expertises_uniques <- unique(infos$Expertise)
-    
-    liste_panels <- lapply(expertises_uniques, function(exp) {
+    output[[paste0("content_exp_", id_propre)]] <- renderUI({
       lignes_sous_expertise <- infos %>% filter(Expertise == exp)
       
       boutons_commentaires <- lapply(1:nrow(lignes_sous_expertise), function(j) {
@@ -199,21 +223,10 @@ server <- function(input, output, session) {
         )
       })
       
-      nav_panel(title = exp, boutons_commentaires)
-    })
-    
-    active_tab <- if(input$mode == "expert") input$select_expert else NULL
-    do.call(navset_tab, c(liste_panels, list(selected = active_tab)))
-  })
-  
-  observe({
-    req(current_selection() != "")
-    lapply(1:nrow(full_data), function(i) {
-      observeEvent(input[[paste0("comment_click_", i)]], {
-        selected_row_index(i)
-      })
+      tagList(boutons_commentaires)
     })
   })
+})
   
   output$description_contact_panel <- renderUI({
     if(is.null(selected_row_index()) || current_selection() == "") {
