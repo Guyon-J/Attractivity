@@ -26,7 +26,7 @@ villes_coords <- data.frame(
           2.3522, 0.3404, 4.0317, -1.6778, 1.0999, 4.3872, 7.7521, 1.4442, 0.6848)
 )
 
-data_info <- read_excel(expertises.xlsx)
+data_info <- read_excel("expertises.xlsx")
 full_data <- inner_join(data_info, villes_coords, by = c("Villes" = "ville"))
 
 
