@@ -159,61 +159,69 @@ server <- function(input, output, session) {
   })
   
   output$info_panel <- renderUI({
-    if(current_selection() == "") {
-      return(p(em("Veuillez cliquer sur un marqueur bleu de la carte pour afficher les expertises de cette ville.")))
-    }
+  if(current_selection() == "") {
+    return(p(em("Veuillez cliquer sur un marqueur bleu de la carte pour afficher les expertises de cette ville.")))
+  }
+  
+  infos <- full_data %>% 
+    mutate(original_id = row_number()) %>% 
+    filter(Villes == current_selection())
+  
+  if(nrow(infos) == 0) return(p("Aucune donnée pour cette ville."))
+  
+  expertises_uniques <- unique(infos$Expertise)
+  
+  liste_panels <- lapply(expertises_uniques, function(exp) {
+    lignes_sous_expertise <- infos %>% filter(Expertise == exp)
     
-    infos <- full_data %>% 
-      mutate(original_id = row_number()) %>% 
-      filter(Villes == current_selection())
-    
-    if(nrow(infos) == 0) return(p("Aucune donnée pour cette ville."))
-    
-    expertises_uniques <- unique(infos$Expertise)
-    
-    liste_panels <- lapply(expertises_uniques, function(exp) {
-      lignes_sous_expertise <- infos %>% filter(Expertise == exp)
+    boutons_commentaires <- lapply(1:nrow(lignes_sous_expertise), function(j) {
+      row_actuelle <- lignes_sous_expertise[j, ]
+      id_global <- row_actuelle$original_id
       
-      boutons_commentaires <- lapply(1:nrow(lignes_sous_expertise), function(j) {
-        row_actuelle <- lignes_sous_expertise[j, ]
-        id_global <- row_actuelle$original_id
-        
-        commentaires_split <- strsplit(as.character(row_actuelle$Commentaire), ";")[[1]]
-        commentaires_html <- lapply(commentaires_split, function(item) {
-          item_clean <- trimws(item)
-          if(item_clean != "") div(paste("•", item_clean), style = "color: #555; font-size: 0.9em;")
-        })
-        
-        actionLink(
-          inputId = paste0("comment_click_", id_global),
-          label = div(
-            style = "text-align: left; color: inherit;",
-            strong(paste("Thématique #", j), style = "font-size: 0.85em; color: #d9534f; display:block;"),
-            commentaires_html
-          ),
-          style = paste0(
-            "display: block; padding: 10px; margin-bottom: 10px; border-left: 3px solid #666; ",
-            "border-radius: 4px; text-decoration: none; transition: all 0.2s; ",
-            if(!is.null(selected_row_index()) && selected_row_index() == id_global) "background: #eaeaea; border-left-color: #d9534f; font-weight: bold;" else "background: #fdfdfd;"
-          )
-        )
+      commentaires_split <- strsplit(as.character(row_actuelle$Commentaire), ";")[[1]]
+      commentaires_html <- lapply(commentaires_split, function(item) {
+        item_clean <- trimws(item)
+        if(item_clean != "") div(paste("•", item_clean), style = "color: #555; font-size: 0.9em;")
       })
       
-      nav_panel(title = exp, boutons_commentaires)
+      actionLink(
+        inputId = paste0("comment_click_", id_global),
+        label = div(
+          style = "text-align: left; color: inherit;",
+          strong(paste("Thématique #", j), style = "font-size: 0.85em; color: #d9534f; display:block;"),
+          commentaires_html
+        ),
+        style = paste0(
+          "display: block; padding: 10px; margin-bottom: 10px; border-left: 3px solid #666; ",
+          "border-radius: 4px; text-decoration: none; transition: all 0.2s; ",
+          if(!is.null(selected_row_index()) && selected_row_index() == id_global) 
+            "background: #eaeaea; border-left-color: #d9534f; font-weight: bold;" 
+          else 
+            "background: #fdfdfd;"
+        )
+      )
     })
     
-    active_tab <- if(input$mode == "expert") input$select_expert else NULL
-    do.call(navset_tab, c(liste_panels, list(selected = active_tab)))
+    nav_panel(title = exp, boutons_commentaires)
   })
   
-  observe({
-    req(current_selection() != "")
-    lapply(1:nrow(full_data), function(i) {
-      observeEvent(input[[paste0("comment_click_", i)]], {
-        selected_row_index(i)
-      })
-    })
-  })
+  # --- MODIFICATIONS ICI ---
+  
+  # 1. On capture l'onglet actuellement ouvert (sans déclencher de réactivité)
+  onglet_actuel <- isolate(input$onglets_expertises)
+  
+  # 2. On détermine l'onglet qui doit être actif
+  active_tab <- if (!is.null(onglet_actuel) && onglet_actuel %in% expertises_uniques) {
+    onglet_actuel # On maintient l'onglet en cours
+  } else if (input$mode == "expert" && !is.null(input$select_expert) && input$select_expert %in% expertises_uniques) {
+    input$select_expert
+  } else {
+    expertises_uniques[1]
+  }
+  
+  # 3. On ajoute l'ID "onglets_expertises" au navset_tab
+  do.call(navset_tab, c(liste_panels, list(id = "onglets_expertises", selected = active_tab)))
+})
   
   output$description_contact_panel <- renderUI({
     if(is.null(selected_row_index()) || current_selection() == "") {
@@ -239,6 +247,13 @@ server <- function(input, output, session) {
       ),
       col_widths = c(8, 4)
     )
+  })
+
+  lapply(1:nrow(full_data), function(i) {
+    observeEvent(input[[paste0("comment_click_", i)]], {
+      selected_row_index(i)
+    }, ignoreInit = TRUE)
+    
   })
 }
 
