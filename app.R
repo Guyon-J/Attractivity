@@ -26,11 +26,7 @@ villes_coords <- data.frame(
           2.3522, 0.3404, 4.0317, -1.6778, 1.0999, 4.3872, 7.7521, 1.4442, 0.6848)
 )
 
-url_excel <- "https://github.com/Guyon-J/Attractivity/raw/refs/heads/main/expertises.xlsx"
-temp_file <- tempfile(fileext = ".xlsx")
-download.file(url_excel, destfile = temp_file, mode = "wb")
-data_info <- read_excel(temp_file)
-
+data_info <- read_excel(expertises.xlsx)
 full_data <- inner_join(data_info, villes_coords, by = c("Villes" = "ville"))
 
 
