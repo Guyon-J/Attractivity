@@ -224,7 +224,7 @@ server <- function(input, output, session) {
     
     layout_columns(
       div(
-        strong(paste("Description (", row_data$Expertise, ") :"), style = "color: #d9534f; font-size: 1.1em; display:block; margin-bottom:5px;"),
+        strong(paste(row_data$Commentaire, " (", row_data$Thématique, ")"), style = "color: #d9534f; font-size: 1.1em; display:block; margin-bottom:5px;"),
         p(
           if(!is.na(row_data$description) && row_data$description != "") row_data$description else "Aucune description disponible.",
           style = "font-size: 0.9em; color: #444; line-height: 1.4;"
