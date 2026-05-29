@@ -204,13 +204,9 @@ server <- function(input, output, session) {
     
     nav_panel(title = exp, boutons_commentaires)
   })
-  
-  # --- MODIFICATIONS ICI ---
-  
-  # 1. On capture l'onglet actuellement ouvert (sans déclencher de réactivité)
+    
   onglet_actuel <- isolate(input$onglets_expertises)
   
-  # 2. On détermine l'onglet qui doit être actif
   active_tab <- if (!is.null(onglet_actuel) && onglet_actuel %in% expertises_uniques) {
     onglet_actuel # On maintient l'onglet en cours
   } else if (input$mode == "expert" && !is.null(input$select_expert) && input$select_expert %in% expertises_uniques) {
@@ -219,7 +215,6 @@ server <- function(input, output, session) {
     expertises_uniques[1]
   }
   
-  # 3. On ajoute l'ID "onglets_expertises" au navset_tab
   do.call(navset_tab, c(liste_panels, list(id = "onglets_expertises", selected = active_tab)))
 })
   
