@@ -241,6 +241,7 @@ server <- function(input, output, session) {
       
       nav_panel(
         title = tags$span(exp, style = "color: #003366; font-weight: 600;"), 
+        value = exp, # <-- C'est cette ligne qui résout le problème !
         boutons_commentaires
       )
     })
