@@ -70,7 +70,7 @@ ui <- page_sidebar(
   layout_columns(
     card(
       full_screen = TRUE,
-      card_header("Carte interactive"), 
+      card_header("Carte interactive", style = "color: #00688B; font-weight: bold;"), 
       leafletOutput("map", height = 600)
     ),
     card(
@@ -82,7 +82,7 @@ ui <- page_sidebar(
       )
     ),
     card(
-      card_header("Description"),
+      card_header("Description", style = "color: #00688B; font-weight: bold;"),
       style = "height: 180px;", 
       card_body(
         uiOutput("description_contact_panel"),
@@ -239,7 +239,10 @@ server <- function(input, output, session) {
         )
       })
       
-      nav_panel(title = exp, boutons_commentaires)
+      nav_panel(
+        title = tags$span(exp, style = "color: #003366; font-weight: 600;"), 
+        boutons_commentaires
+      )
     })
     
     onglet_actuel <- isolate(input$onglets_expertises)
