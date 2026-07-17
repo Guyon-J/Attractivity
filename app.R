@@ -189,7 +189,6 @@ server <- function(input, output, session) {
       filter(Villes == current_selection()) %>%
       filter(Thématique %in% input$filtre_thematique)
     
-    # MODIFIÉ : Recherche simultanée dans Commentaire OU description pour le panneau
     if (!is.null(input$search_keyword) && input$search_keyword != "") {
       infos <- infos %>% filter(
         grepl(input$search_keyword, Commentaire, ignore.case = TRUE) | 
