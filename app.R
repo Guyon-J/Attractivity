@@ -70,11 +70,11 @@ ui <- page_sidebar(
   layout_columns(
     card(
       full_screen = TRUE,
-      card_header("Carte interactive", style = "color: #00688B; font-weight: bold;"), 
+      card_header("Carte interactive", style = "color: #003366; font-weight: bold;"), 
       leafletOutput("map", height = 600)
     ),
     card(
-      card_header("Détails par expertise", style = "color: #00688B; font-weight: bold;"), 
+      card_header("Détails par expertise", style = "color: #003366; font-weight: bold;"), 
       style = "height: 660px;", 
       card_body(
         uiOutput("info_panel"),
@@ -82,7 +82,7 @@ ui <- page_sidebar(
       )
     ),
     card(
-      card_header("Description", style = "color: #00688B; font-weight: bold;"),
+      card_header("Description", style = "color: #003366; font-weight: bold;"),
       style = "height: 180px;", 
       card_body(
         uiOutput("description_contact_panel"),
