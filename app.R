@@ -74,7 +74,7 @@ ui <- page_sidebar(
       leafletOutput("map", height = 600)
     ),
     card(
-      card_header("Détails par expertise"), 
+      card_header("Détails par expertise", style = "color: #00688B; font-weight: bold;"), 
       style = "height: 660px;", 
       card_body(
         uiOutput("info_panel"),
