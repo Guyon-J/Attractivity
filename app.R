@@ -39,6 +39,18 @@ ui <- page_sidebar(
   title = "Collège National de Biochimie-Biologie Moléculaire Médicale - Carte des thématiques de recherche",
   sidebar = sidebar(
     title = "Biochimie",
+    
+    textInput(
+      inputId = "search_keyword", 
+      label = tags$span(icon("search"), " Rechercher :"), 
+      placeholder = "LBMR, pathologie..."
+    ),
+    hr(), 
+    
+    checkboxGroupInput("filtre_thematique", "Thématique :",
+                       choices = c("Soin", "Recherche", "Translationnel"),
+                       selected = c("Soin", "Recherche", "Translationnel")),
+    
     radioButtons("mode", "Mode de recherche :",
                  choices = list("Par ville" = "liste", "Par expertise" = "expert")),
     
@@ -70,7 +82,7 @@ ui <- page_sidebar(
       )
     ),
     card(
-      card_header("Description & Contact"),
+      card_header("Description"),
       style = "height: 180px;", 
       card_body(
         uiOutput("description_contact_panel"),
@@ -80,7 +92,6 @@ ui <- page_sidebar(
     col_widths = c(5, 7, 12)
   )
 )
-
 
 # ==========================================
 # SERVEUR
@@ -102,7 +113,7 @@ server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     leaflet(options = leafletOptions(
-      dragging = FALSE,           
+      dragging = FALSE,            
       zoomControl = FALSE,        
       scrollWheelZoom = FALSE,    
       doubleClickZoom = FALSE,    
@@ -135,14 +146,24 @@ server <- function(input, output, session) {
   })
   
   observe({
-    proxy <- leafletProxy("map")
+    proxy = leafletProxy("map")
     proxy %>% clearMarkers()
     
+    req(input$filtre_thematique)
+    df_base <- full_data %>% filter(Thématique %in% input$filtre_thematique)
+    
+    if (!is.null(input$search_keyword) && input$search_keyword != "") {
+      df_base <- df_base %>% filter(
+        grepl(input$search_keyword, Commentaire, ignore.case = TRUE) | 
+          grepl(input$search_keyword, description, ignore.case = TRUE)
+      )
+    }
+    
     if (input$mode == "liste") {
-      df_to_plot <- villes_coords
+      df_to_plot <- df_base %>% distinct(Villes, lat, lng) %>% rename(ville = Villes)
     } else {
       req(input$select_expert)
-      df_to_plot <- full_data %>% 
+      df_to_plot <- df_base %>% 
         filter(Expertise == input$select_expert) %>%
         distinct(Villes, lat, lng) %>%
         rename(ville = Villes)
@@ -159,64 +180,81 @@ server <- function(input, output, session) {
   })
   
   output$info_panel <- renderUI({
-  if(current_selection() == "") {
-    return(p(em("Veuillez cliquer sur un marqueur bleu de la carte pour afficher les expertises de cette ville.")))
-  }
-  
-  infos <- full_data %>% 
-    mutate(original_id = row_number()) %>% 
-    filter(Villes == current_selection())
-  
-  if(nrow(infos) == 0) return(p("Aucune donnée pour cette ville."))
-  
-  expertises_uniques <- unique(infos$Expertise)
-  
-  liste_panels <- lapply(expertises_uniques, function(exp) {
-    lignes_sous_expertise <- infos %>% filter(Expertise == exp)
+    if(current_selection() == "") {
+      return(p(em("Veuillez cliquer sur un marqueur bleu de la carte pour afficher les expertises de cette ville.")))
+    }
     
-    boutons_commentaires <- lapply(1:nrow(lignes_sous_expertise), function(j) {
-      row_actuelle <- lignes_sous_expertise[j, ]
-      id_global <- row_actuelle$original_id
+    infos <- full_data %>% 
+      mutate(original_id = row_number()) %>% 
+      filter(Villes == current_selection()) %>%
+      filter(Thématique %in% input$filtre_thematique)
+    
+    # MODIFIÉ : Recherche simultanée dans Commentaire OU description pour le panneau
+    if (!is.null(input$search_keyword) && input$search_keyword != "") {
+      infos <- infos %>% filter(
+        grepl(input$search_keyword, Commentaire, ignore.case = TRUE) | 
+          grepl(input$search_keyword, description, ignore.case = TRUE)
+      )
+    }
+    
+    if(nrow(infos) == 0) return(p("Aucune donnée ne correspond à votre recherche pour cette ville."))
+    
+    expertises_uniques <- unique(infos$Expertise)
+    
+    liste_panels <- lapply(expertises_uniques, function(exp) {
+      lignes_sous_expertise <- infos %>% filter(Expertise == exp)
       
-      commentaires_split <- strsplit(as.character(row_actuelle$Commentaire), ";")[[1]]
-      commentaires_html <- lapply(commentaires_split, function(item) {
-        item_clean <- trimws(item)
-        if(item_clean != "") div(paste("•", item_clean), style = "color: #555; font-size: 0.9em;")
+      boutons_commentaires <- lapply(1:nrow(lignes_sous_expertise), function(j) {
+        row_actuelle <- lignes_sous_expertise[j, ]
+        id_global <- row_actuelle$original_id
+        
+        commentaires_split <- strsplit(as.character(row_actuelle$Commentaire), ";")[[1]]
+        commentaires_html <- lapply(commentaires_split, function(item) {
+          item_clean <- trimws(item)
+          if(item_clean != "") div(paste("•", item_clean), style = "color: #555; font-size: 0.9em;")
+        })
+        
+        couleur_titre <- if (grepl("Soin", row_actuelle$Thématique, ignore.case = TRUE)) {
+          "#0275d8" 
+        } else if (grepl("Translationnel", row_actuelle$Thématique, ignore.case = TRUE)) {
+          "#5cb85c" 
+        } else {
+          "#d9534f"
+        }
+        
+        actionLink(
+          inputId = paste0("comment_click_", id_global),
+          label = div(
+            style = "text-align: left; color: inherit;",
+            strong(paste(row_actuelle$Thématique, "#", j), style = paste0("font-size: 0.85em; color: ", couleur_titre, "; display:block;")),
+            commentaires_html
+          ),
+          style = paste0(
+            "display: block; padding: 10px; margin-bottom: 10px; border-left: 3px solid #666; ",
+            "border-radius: 4px; text-decoration: none; transition: all 0.2s; ",
+            if(!is.null(selected_row_index()) && selected_row_index() == id_global) 
+              paste0("background: #eaeaea; border-left-color: ", couleur_titre, "; font-weight: bold;") 
+            else 
+              "background: #fdfdfd;"
+          )
+        )
       })
       
-      actionLink(
-        inputId = paste0("comment_click_", id_global),
-        label = div(
-          style = "text-align: left; color: inherit;",
-          strong(paste("Thématique #", j), style = "font-size: 0.85em; color: #d9534f; display:block;"),
-          commentaires_html
-        ),
-        style = paste0(
-          "display: block; padding: 10px; margin-bottom: 10px; border-left: 3px solid #666; ",
-          "border-radius: 4px; text-decoration: none; transition: all 0.2s; ",
-          if(!is.null(selected_row_index()) && selected_row_index() == id_global) 
-            "background: #eaeaea; border-left-color: #d9534f; font-weight: bold;" 
-          else 
-            "background: #fdfdfd;"
-        )
-      )
+      nav_panel(title = exp, boutons_commentaires)
     })
     
-    nav_panel(title = exp, boutons_commentaires)
-  })
+    onglet_actuel <- isolate(input$onglets_expertises)
     
-  onglet_actuel <- isolate(input$onglets_expertises)
-  
-  active_tab <- if (!is.null(onglet_actuel) && onglet_actuel %in% expertises_uniques) {
-    onglet_actuel # On maintient l'onglet en cours
-  } else if (input$mode == "expert" && !is.null(input$select_expert) && input$select_expert %in% expertises_uniques) {
-    input$select_expert
-  } else {
-    expertises_uniques[1]
-  }
-  
-  do.call(navset_tab, c(liste_panels, list(id = "onglets_expertises", selected = active_tab)))
-})
+    active_tab <- if (!is.null(onglet_actuel) && onglet_actuel %in% expertises_uniques) {
+      onglet_actuel 
+    } else if (input$mode == "expert" && !is.null(input$select_expert) && input$select_expert %in% expertises_uniques) {
+      input$select_expert
+    } else {
+      expertises_uniques[1]
+    }
+    
+    do.call(navset_tab, c(liste_panels, list(id = "onglets_expertises", selected = active_tab)))
+  })
   
   output$description_contact_panel <- renderUI({
     if(is.null(selected_row_index()) || current_selection() == "") {
@@ -225,30 +263,72 @@ server <- function(input, output, session) {
     
     row_data <- full_data[selected_row_index(), ]
     
+    couleur_titre <- if (grepl("Soin", row_data$Thématique, ignore.case = TRUE)) {
+      "#0275d8"
+    } else if (grepl("Translationnel", row_data$Thématique, ignore.case = TRUE)) {
+      "#5cb85c"
+    } else {
+      "#d9534f"
+    }
+    
+    nom_centre <- if(!is.null(row_data$Site) && !is.na(row_data$Site) && row_data$Site != "") row_data$Site else "Site non précisé"
+    
     layout_columns(
       div(
-        strong(paste(row_data$Commentaire, " (", row_data$Thématique, ")"), style = "color: #d9534f; font-size: 1.1em; display:block; margin-bottom:5px;"),
+        strong(row_data$Commentaire, style = paste0("color: ", couleur_titre, "; font-size: 1.2em; display:block; margin-bottom:10px; line-height: 1.2;")),
         p(
           if(!is.na(row_data$description) && row_data$description != "") row_data$description else "Aucune description disponible.",
-          style = "font-size: 0.9em; color: #444; line-height: 1.4;"
+          style = "font-size: 0.95em; color: #444; line-height: 1.5;"
         )
       ),
+      
       div(
-        strong("Contact :", style = "color: #d9534f; font-size: 1.1em; display:block; margin-bottom:5px;"),
         p(
-          if(!is.na(row_data$contact) && row_data$contact != "") row_data$contact else "Aucun contact disponible.",
-          style = "font-size: 0.9em; color: #444;"
+          strong("Lieu : ", style = "color: black; font-size: 1.05em;"),
+          span(nom_centre, style = "font-size: 0.95em; font-weight: bold; color: #00688B;"), 
+          style = "margin-bottom: 10px;"
+        ),
+        
+        p(
+          strong("Contact : ", style = "color: black; font-size: 1.05em;"),
+          span(
+            if(!is.na(row_data$contact) && row_data$contact != "") row_data$contact else "Aucun contact disponible.",
+            style = "font-size: 0.95em; color: #00688B;"
+          ),
+          style = "margin-bottom: 10px;"
+        ),
+        
+        p(
+          style = "margin-bottom: 0px; display: flex; align-items: center;",
+          strong("Site internet : ", style = "color: black; font-size: 1.05em; margin-right: 5px;"),
+          span(
+            if(!is.na(row_data[["site internet"]]) && row_data[["site internet"]] != "") {
+              tags$a(
+                href = row_data[["site internet"]], 
+                target = "_blank", 
+                class = "btn btn-sm",
+                style = paste0(
+                  "background-color: #00688B; color: white; ",
+                  "padding: 2px 8px; font-size: 0.85em; border-radius: 4px; ",
+                  "display: inline-flex; align-items: center; font-weight: 500; border: none;"
+                ),
+                HTML("Visiter &nbsp;&#x2197;")
+              )
+            } else {
+              "Aucun site internet disponible."
+            },
+            style = "font-size: 0.95em; color: darkred;"
+          )
         )
       ),
       col_widths = c(8, 4)
     )
   })
-
+  
   lapply(1:nrow(full_data), function(i) {
     observeEvent(input[[paste0("comment_click_", i)]], {
       selected_row_index(i)
     }, ignoreInit = TRUE)
-    
   })
 }
 
