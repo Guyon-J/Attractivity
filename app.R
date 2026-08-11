@@ -8,7 +8,7 @@ library(leaflet)
 library(visNetwork)
 library(dplyr)
 library(shinyjs)
-
+library(readxl)
 
 # ==========================================
 # Global
@@ -204,10 +204,10 @@ ui <- page_navbar(
                 h2("Carte national des expertises en Biochimie et Biologie Moléculaire", class = "home-title"),
                 layout_column_wrap(
                   width = 1/2,
-                  actionButton("go_carte", "🗺️ Carte interactive", class = "home-card-btn"),
                   actionButton("go_villes", "🏙️ Villes", class = "home-card-btn"),
                   actionButton("go_thema", "🎯 Thématiques", class = "home-card-btn"),
-                  actionButton("go_expert", "🔬 Expertises", class = "home-card-btn")
+                  actionButton("go_expert", "🔬 Expertises", class = "home-card-btn"),
+                  actionButton("go_carte", "🗺️ Carte interactive", class = "home-card-btn"),
                 )
             )
   ),
