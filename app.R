@@ -633,16 +633,16 @@ server <- function(input, output, session) {
   # -----------------------------------------------------------
   
   credits_photos <- c(
-    "Amiens"           = "📷 Photo : ",
-    "Angers"           = "📷 Photo : ",
+    "Amiens"           = "📷 Photo : Alex",
+    "Angers"           = "📷 Photo : P. Bernardon",
     "Besançon"         = "📷 Photo : ",
     "Bordeaux"         = "📷 Photo : J. Di Nella",
     "Brest"            = "📷 Photo : ",
     "Caen"             = "📷 Photo : ",
-    "Clermont-Ferrand" = "📷 Photo : ",
-    "Dijon"            = "📷 Photo : ",
-    "Grenoble"         = "📷 Photo : ",
-    "Lille"            = "📷 Photo : ",
+    "Clermont-Ferrand" = "📷 Photo : L. Gaudiau",
+    "Dijon"            = "📷 Photo : D. Tischer",
+    "Grenoble"         = "📷 Photo : M. Wieland",
+    "Lille"            = "📷 Photo : T. Zielonka",
     "Limoges"          = "📷 Photo : ",
     "Lyon"             = "📷 Photo : D. H. N. Nguyen",
     "Marseille"        = "📷 Photo : ",
@@ -653,14 +653,14 @@ server <- function(input, output, session) {
     "Nice"             = "📷 Photo : ",
     "Nîmes"            = "📷 Photo : ",
     "Orléans"          = "📷 Photo : ",
-    "Paris"            = "📷 Photo : ",
+    "Paris"            = "📷 Photo : C. Karidis",
     "Poitiers"         = "📷 Photo : ",
     "Reims"            = "📷 Photo : ",
     "Rennes"           = "📷 Photo : ",
     "Rouen"            = "📷 Photo : ",
     "Saint-Étienne"    = "📷 Photo : ",
-    "Strasbourg"       = "📷 Photo : ",
-    "Toulouse"         = "📷 Photo : ",
+    "Strasbourg"       = "📷 Photo : Y. Deshko",
+    "Toulouse"         = "📷 Photo : K. Bessat",
     "Tours"            = "📷 Photo : "
   )  
 }
