@@ -644,7 +644,7 @@ server <- function(input, output, session) {
     "Grenoble"         = "📷 Photo : ",
     "Lille"            = "📷 Photo : ",
     "Limoges"          = "📷 Photo : ",
-    "Lyon"             = "📷 Photo : ",
+    "Lyon"             = "📷 Photo : D. H. N. Nguyen",
     "Marseille"        = "📷 Photo : ",
     "Metz"             = "📷 Photo : ",
     "Montpellier"      = "📷 Photo : ",
