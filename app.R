@@ -201,7 +201,7 @@ ui <- page_navbar(
   # ACCUEIL
   nav_panel("Accueil", value = "page_accueil",
             div(style = "text-align: center; padding: 50px 20px;",
-                h2("Carte national des expertises en Biochimie et Biologie Moléculaire", class = "home-title"),
+                h2("Carte nationale des expertises en Biochimie et Biologie Moléculaire", class = "home-title"),
                 layout_column_wrap(
                   width = 1/2,
                   actionButton("go_villes", "🏙️ Villes", class = "home-card-btn"),
