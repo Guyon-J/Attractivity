@@ -18,7 +18,7 @@ villes_coords <- data.frame(
   ville = c("Amiens", "Angers", "Besançon", "Bordeaux", "Brest", "Caen", "Clermont-Ferrand", 
             "Dijon", "Grenoble", "Lille", "Limoges", "Lyon", "Marseille", "Metz", 
             "Montpellier", "Nancy", "Nantes", "Nice", "Nîmes", "Orléans", "Paris", 
-            "Poitiers", "Reims", "Rennes", "Rouen", "Saint-Étienne", "Strasbourg", "Toulouse", "Tours"),
+            "Poitiers", "Reims", "Rennes", "Rouen", "Saint-Etienne", "Strasbourg", "Toulouse", "Tours"),
   lat = c(49.8942, 47.4784, 47.2378, 44.8378, 48.3903, 49.1828, 45.7772, 47.3220, 45.1885, 
           50.6292, 45.8336, 45.7640, 43.2965, 49.1193, 43.6108, 48.6921, 47.2184, 43.7102, 
           43.8367, 47.9030, 48.8566, 46.5802, 49.2583, 48.1173, 49.4432, 45.4397, 48.5734, 43.6047, 47.3941),
@@ -658,7 +658,7 @@ server <- function(input, output, session) {
     "Reims"            = "📷 Photo : Adlan",
     "Rennes"           = "📷 Photo : T. Ly",
     "Rouen"            = "📷 Photo : J. Desplanques",
-    "Saint-Étienne"    = "📷 Photo : D. Leveque",
+    "Saint-Etienne"    = "📷 Photo : D. Leveque",
     "Strasbourg"       = "📷 Photo : Y. Deshko",
     "Toulouse"         = "📷 Photo : K. Bessat",
     "Tours"            = "📷 Photo : P. Bernardon"
