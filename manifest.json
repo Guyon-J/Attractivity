@@ -2649,7 +2649,7 @@
       "checksum": "5aa93ec4e09f14b2efa729ff1b56faa9"
     },
     ".Rprofile": {
-      "checksum": "adb91d24f9bd4a8eb83b71a00296dc94"
+      "checksum": "f2c29f147705841779549b99b972a1f0"
     },
     "Aperçu.png": {
       "checksum": "1c9d092dcc913e48d9e293a70485c552"
@@ -2683,6 +2683,18 @@
     },
     "ui.R": {
       "checksum": "dd03476373d317044113196b406431cf"
+    },
+    "v1/app.R": {
+      "checksum": "f97e20f65aa79077339a1c4e7574141e"
+    },
+    "v1/expertises.xlsx": {
+      "checksum": "4e10de12c23b24d5603f4a10ee24f420"
+    },
+    "v1/LICENSE": {
+      "checksum": "1ebbd3e34237af26da5dc08a4e440464"
+    },
+    "v1/README.md": {
+      "checksum": "996e3614a12145d1572531825292c7a5"
     }
   },
   "users": null
