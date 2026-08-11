@@ -27,7 +27,7 @@ jobs:
 
       - name: Install R packages
         run: |
-          install.packages(c("rsconnect", "shiny", "bslib", "dplyr", "leaflet", "readxl", "visNetwork", "shinyjs"), repos = "https://cran.rstudio.com/")
+          install.packages(c("rsconnect", "shiny", "bslib", "dplyr", "leaflet", "readxl"), repos = "https://cran.rstudio.com/")
         shell: Rscript {0}
 
       - name: Authorize and Deploy Application
